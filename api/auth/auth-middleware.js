@@ -9,13 +9,10 @@ const Users = require('../users/users-model');
   }
 */
 function restricted(req, res, next) {
-  if(req.session.user) {
-    next();
+  if(!req.session.user) {
+    res.status(401).json({ message: 'You shall not pass!' });
   } else {
-    next({
-      status: 401,
-      message: 'you are not authorized to access this API'
-    })
+    next();
   }
 }
 
@@ -28,9 +25,9 @@ function restricted(req, res, next) {
   }
 */
 async function checkUsernameFree(req, res, next) {
-  const [user] = await Users.findBy({ username: req.user.username })
-  if(user != null) {
-    next({ status: 400, message: 'user already exists' });
+  const user = await Users.findBy({ username: req.body.username }).first();
+  if(user) {
+    res.status(422).json({ message: 'Username taken' });
   } else {
     next();
   }
@@ -45,11 +42,10 @@ async function checkUsernameFree(req, res, next) {
   }
 */
 async function checkUsernameExists(req, res, next) {
-  const [user] = await Users.findBy({ username: req.user.username });
-  if(user == null) {
-    next({ status: 400, message: 'invalid login credentials' });
+  const user = await Users.findBy({ username: req.body.username }).first();
+  if(!user) {
+    res.status(401).json({ message: 'Invalid credentials' });
   } else {
-    // req.user.hash = user.password;
     req.user = user;
     next();
   }
@@ -65,14 +61,13 @@ async function checkUsernameExists(req, res, next) {
 */
 function checkPasswordLength(req, res, next) {
   if(!req.body.password || req.body.password.length < 3) {
-    res.status(422).json({ message: 'Password must be longer than 3 characters' });
+    res.status(422).json({ message: 'Password must be longer than 3 chars' });
   } else {
     next();
   }
 }
 
-// Don't forget to add these to the `exports` object so they can be required in other modules
-
+  // Don't forget to add these to the `exports` object so they can be required in other modules
 
 module.exports = {
   restricted,

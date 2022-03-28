@@ -23,7 +23,7 @@ const server = express();
 
 const sessionConfig = {
   name: 'chocolatechip',
-  secret: 'You will never guess this password',
+  secret: 'get in my belly',
   cookie: {
     maxAge: 1000 * 60,
     secure: false,
